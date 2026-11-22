@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 单文件版：5E × 完美 查成分（所有 JS 已内联，可直接上传到静态托管） -->
     <title>5E × 完美 全平台查成分</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -12,66 +13,403 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FB7299',
-                        secondary: '#3B82F6',
+                        primary: '#ff9b48',
+                        secondary: '#ffb066',
                         dark: {
-                            bg: '#0F172A',
-                            card: '#1E293B',
-                            border: '#334155'
+                            bg: '#17120e',
+                            card: '#1f1812',
+                            border: '#3a2a1c'
                         }
                     },
                     fontFamily: {
                         sans: ['Microsoft YaHei', 'Segoe UI', 'SimHei', 'sans-serif']
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.3s ease-in-out'
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(6px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        }
                     }
                 }
             }
         }
     </script>
     <style>
-        .player-card {
-            animation: fadeIn .3s ease-in-out;
+        /* ===== 配色取自 client.js：暖黑底 + 橙色高亮 ===== */
+        :root {
+            --bg: #17120e;
+            --card: #1f1812;
+            --sec: #241c15;
+            --line: rgba(255, 170, 90, .16);
+            --line-strong: rgba(255, 170, 90, .30);
+            --ink: #fff5e8;
+            --ink-dim: rgba(255, 236, 220, .62);
+            --ink-mute: rgba(255, 236, 220, .45);
+            --orange: #ff9b48;
+            --orange-2: #ff7126;
+            --orange-soft: #ffb066;
+            --orange-ink: #2a1305;
         }
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(6px); }
-            100% { opacity: 1; transform: translateY(0); }
+
+        html, body {
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        /* ---- 顶部标题：client.js 的 hero 渐变 ---- */
+        .app-hero {
+            position: relative;
+            overflow: hidden;
+            color: #fff5e8;
+            background:
+                radial-gradient(760px 260px at 0% 0%, rgba(255, 138, 48, .32), transparent 62%),
+                radial-gradient(640px 300px at 100% 100%, rgba(72, 168, 255, .18), transparent 66%),
+                linear-gradient(132deg, #17120e 0%, #2a1a10 46%, #111821 100%);
+            border-bottom: 1px solid rgba(255, 170, 90, .22);
+            box-shadow: 0 20px 54px rgba(0, 0, 0, .35);
+        }
+
+        .app-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: .28;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+            background-size: 44px 44px;
+            -webkit-mask-image: radial-gradient(600px 260px at 78% 18%, #000, transparent 72%);
+            mask-image: radial-gradient(600px 260px at 78% 18%, #000, transparent 72%);
+        }
+
+        .app-hero h1 {
+            color: #fff5e8;
+            letter-spacing: -.02em;
+            font-weight: 660;
+            text-shadow: 0 2px 18px rgba(0, 0, 0, .35);
+        }
+
+        .app-hero .sub {
+            color: rgba(255, 240, 225, .72);
+        }
+
+        .app-eyebrow {
+            font-size: 11px;
+            letter-spacing: .22em;
+            font-weight: 650;
+            color: #ffb066;
+        }
+
+        /* ---- 搜索面板 ---- */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            box-shadow: 0 18px 44px rgba(0, 0, 0, .28);
+        }
+
+        .search-input {
+            background: rgba(10, 8, 7, .56);
+            border: 1px solid rgba(255, 190, 130, .26);
+            color: #fff4e8;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 236, 220, .36);
+        }
+
+        .search-input:focus {
+            border-color: #ff9a4d;
+            box-shadow: 0 0 0 3px rgba(255, 140, 60, .16);
+        }
+
+        /* ---- 按钮：client.js 的橙色渐变 ---- */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff9b48, #ff7126);
+            color: var(--orange-ink);
+            font-weight: 600;
+            border: 1px solid transparent;
+            box-shadow: 0 8px 22px rgba(255, 120, 40, .26);
+            transition: background .15s, transform .15s, box-shadow .15s;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ffab60, #ff8038);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, .07);
+            color: rgba(255, 240, 225, .66);
+            border: 1px solid transparent;
+            transition: background .15s, color .15s;
+        }
+
+        .mode-btn:hover {
+            color: #fff5e8;
+            background: rgba(255, 255, 255, .13);
+        }
+
+        .mode-btn.active {
+            background: var(--orange);
+            color: var(--orange-ink);
+            font-weight: 650;
+        }
+
+        /* ---- 玩家卡片 / 平台区块 ---- */
+        .player-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            box-shadow: 0 20px 54px rgba(0, 0, 0, .26);
+        }
+
+        .platform-sec {
+            background: var(--sec);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .sec-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .sec-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .sec-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 170, 90, .22);
+            flex-shrink: 0;
+        }
+
+        .sec-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .sec-title {
+            font-size: 13.5px;
+            font-weight: 620;
+            color: var(--ink);
+            white-space: nowrap;
+        }
+
+        .sec-badge {
+            font-size: 11px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, .07);
+            color: var(--ink-dim);
+        }
+
+        .sec-badge.ok {
+            background: rgba(105, 201, 143, .16);
+            color: #7fd6a2;
+        }
+
+        .sec-badge.warn {
+            background: rgba(240, 120, 79, .18);
+            color: #f2917a;
+        }
+
+        /* ---- 历史最高段位框 ---- */
+        .hl-box {
+            margin-top: 10px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 155, 72, .16), rgba(255, 113, 38, .05));
+            border: 1px solid rgba(255, 155, 72, .38);
+        }
+
+        .hl-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .hl-label {
+            font-size: 11.5px;
+            font-weight: 650;
+            color: var(--orange-soft);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hl-season {
+            font-size: 11px;
+            color: rgba(255, 176, 102, .8);
+        }
+
+        .hl-rank {
+            font-size: 26px;
+            font-weight: 750;
+            line-height: 1.05;
+            letter-spacing: -.01em;
+        }
+
+        .hl-score {
+            font-size: 12.5px;
+            color: var(--ink-dim);
+        }
+
+        .hl-grid {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 12px;
+            row-gap: 2px;
+        }
+
+        .hl-k {
+            font-size: 11px;
+            color: var(--ink-mute);
+        }
+
+        .hl-v {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 245, 232, .92);
+        }
+
+        /* ---- 本赛季 / 国服 醒目数据框 ---- */
+        .stat-box {
+            margin-top: 10px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 155, 72, .18), rgba(255, 113, 38, .06));
+            border: 1px solid rgba(255, 155, 72, .45);
+            box-shadow: 0 10px 26px rgba(255, 120, 40, .10), inset 0 1px 0 rgba(255, 255, 255, .05);
+        }
+
+        .stat-box-title {
+            font-size: 11px;
+            font-weight: 650;
+            letter-spacing: .06em;
+            color: var(--orange-soft);
+            margin-bottom: 6px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px 10px;
+        }
+
+        .stat-cell {
+            background: rgba(10, 8, 7, .30);
+            border: 1px solid rgba(255, 170, 90, .14);
+            border-radius: 9px;
+            padding: 6px 9px;
+            min-width: 0;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 10.5px;
+            letter-spacing: .04em;
+            color: var(--ink-mute);
+            margin-bottom: 1px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 21px;
+            line-height: 1.15;
+            font-weight: 750;
+            color: #ffb066;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -.01em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ---- 把 app.js 里用的灰色统一调成暖色 ---- */
+        .dark .text-gray-500,
+        .dark .text-gray-400 {
+            color: rgba(255, 236, 220, .55);
+        }
+
+        .dark .text-gray-300,
+        .dark .text-gray-200 {
+            color: rgba(255, 245, 232, .88);
+        }
+
+        .dark .text-gray-100 {
+            color: var(--ink);
+        }
+
+        .dark .text-green-500 {
+            color: #7fd6a2;
+        }
+
+        .dark .text-red-500 {
+            color: #f2917a;
+        }
+
+        .dark .text-secondary {
+            color: var(--orange-soft);
+        }
+
+        .dark .text-primary {
+            color: var(--orange);
+        }
+
+        /* 初始占位 / 页脚 */
+        .empty-box {
+            background: var(--card);
+            border: 1px dashed rgba(255, 170, 90, .22);
+        }
+
+        .app-footer {
+            background: rgba(0, 0, 0, .22);
+            border-top: 1px solid var(--line);
+            color: var(--ink-mute);
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-gray-100 transition-colors duration-300">
-<header class="bg-gradient-to-r from-primary to-secondary text-white shadow-lg">
-    <div class="container mx-auto px-4 py-6">
+<body class="bg-dark-bg text-[#fff5e8] transition-colors duration-300">
+<header class="app-hero">
+    <div class="container mx-auto px-4 py-7 relative z-10">
         <div class="flex justify-between items-center">
-            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold">5E × 完美 查成分</h1>
-            <button id="themeToggle" class="bg-white/20 hover:bg-white/30 transition-colors px-4 py-2 rounded-lg flex items-center gap-2">
-                <i class="fa fa-moon-o dark:hidden"></i>
-                <i class="fa fa-sun-o hidden dark:inline-block"></i>
-                <span class="dark:hidden">暗色模式</span>
-                <span class="hidden dark:inline-block">亮色模式</span>
-            </button>
+            <div>
+                <div class="app-eyebrow mb-2">5E × PERFECT WORLD · CS2</div>
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)]">5E × 完美 查成分</h1>
+            </div>
         </div>
-        <p class="mt-2 opacity-90">输入昵称或 SteamID，一次拉取 5E / 完美 / Steam 三方数据（查到哪个先显示哪个）</p>
+        <p class="mt-2 sub">输入昵称或 SteamID，一次拉取 5E / 完美 / Steam 三方数据（查到哪个先显示哪个）</p>
     </div>
 </header>
 
 <main class="container mx-auto px-4 py-8">
     <!-- 搜索区 -->
-    <div class="bg-white dark:bg-dark-card rounded-xl shadow-md p-6 mb-8">
+    <div class="panel rounded-xl p-6 mb-8">
         <!-- 查询模式：两个按钮切换，决定用哪个平台查昵称 -->
         <div class="flex flex-wrap items-center gap-3 mb-4">
-            <div id="modeSwitcher" class="inline-flex p-1 rounded-lg bg-gray-100 dark:bg-dark-bg">
-                <button data-mode="5e" class="mode-btn">用 5E 昵称查</button>
-                <button data-mode="perfect" class="mode-btn">用完美昵称查</button>
+            <div id="modeSwitcher" class="inline-flex p-1 rounded-lg" style="background:rgba(0,0,0,.28);border:1px solid var(--line)">
+                <button data-mode="5e" class="mode-btn px-4 py-2 rounded-md text-sm">用 5E 昵称查</button>
+                <button data-mode="perfect" class="mode-btn px-4 py-2 rounded-md text-sm">用完美昵称查</button>
             </div>
-            <span class="text-xs text-gray-400 dark:text-gray-500">输入 SteamID（76 开头 17 位）时会自动同时查两个平台</span>
+            <span class="text-xs" style="color:var(--ink-mute)">输入 SteamID（76 开头 17 位）时会自动同时查两个平台</span>
         </div>
 
         <div class="flex flex-col md:flex-row gap-3">
@@ -79,18 +417,18 @@
                 type="text"
                 id="searchInput"
                 placeholder="输入 5E 昵称（或 SteamID）"
-                class="flex-1 px-4 py-3 rounded-lg border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                class="search-input flex-1 px-4 py-3 rounded-lg"
             >
             <button
                 id="searchButton"
-                class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-all transform hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
+                class="btn-primary px-6 py-3 rounded-lg flex items-center justify-center gap-2"
             >
                 <i class="fa fa-search"></i>
                 <span>搜索</span>
             </button>
         </div>
 
-        <div id="searchHint" class="mt-3 text-sm text-gray-500 dark:text-gray-400"></div>
+        <div id="searchHint" class="mt-3 text-sm" style="color:var(--ink-dim)"></div>
 
         <!-- 同名候选 -->
         <div id="candidatesBar" class="mt-3 hidden flex-wrap gap-2"></div>
@@ -100,22 +438,2149 @@
     <div id="resultsContainer" class="space-y-6"></div>
 
     <!-- 初始状态 -->
-    <div id="initialState" class="text-center py-16 border border-dashed border-gray-200 dark:border-dark-border rounded-xl bg-white dark:bg-dark-card m-4">
-        <i class="fa fa-search text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
-        <p class="text-gray-500 dark:text-gray-400">输入 5E 昵称 / 完美昵称 / SteamID 开始查询</p>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">例：Sky_Bendou、洛琪希喵、76561199012971728</p>
+    <div id="initialState" class="empty-box text-center py-16 rounded-xl m-4">
+        <i class="fa fa-search text-4xl mb-4" style="color:rgba(255,170,90,.35)"></i>
+        <p style="color:var(--ink-dim)">输入 5E 昵称 / 完美昵称 / SteamID 开始查询</p>
+        <p class="text-xs mt-2" style="color:var(--ink-mute)">例：Sky_Bendou、洛琪希喵、76561199012971728</p>
     </div>
 </main>
 
-<footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border py-4 mt-12">
-    <div class="container mx-auto px-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+<footer class="app-footer py-4 mt-12">
+    <div class="container mx-auto px-4 text-center text-sm">
         <p>5E × 完美查成分 &copy; 2026 | 数据来源：5E 平台 / 完美平台 / Steam</p>
     </div>
 </footer>
 
-<script src="stecit/5ePlayApi.js"></script>
-<script src="stecit/perfectApi.js"></script>
-<script src="stecit/copy-toast.js"></script>
-<script src="stecit/app.js"></script>
+<script>
+/* ================= stecit/5ePlayApi.js ================= */
+const imgeshost = 'https://oss-arena.5eplay.com/';
+const homeHost = 'https://arena.5eplay.com/data/player/';
+
+const WE_idTransfer = 'https://gate.5eplay.com/userinterface/http/v1/userinterface/idTransfer';//uuid获取接口
+const WE_home = 'https://gate.5eplay.com/crane/http/api/data/player/home?uuid='; // 用户生涯数据接口
+const WE_best_season = 'https://gate.5eplay.com/crane/http/api/data/player/best_season?uuid=';//用户主页数据接口
+const WE_macthlist_api = 'https://gate.5eplay.com/crane/http/api/data/match/list';//用户比赛列表接口
+const WE_match = 'https://gate.5eplay.com/crane/http/api/data/match/';//对局详细接口
+const WE_userData = 'https://gate.5eplay.com/reddot_proxy/http/api/data/player?uuid=';//用户基础数据(账号状态等)
+const WE_steamName = 'https://api-client-arena.5eplay.com/api/user/steam_username/';//5E steam获取5e昵称接口
+//5E玩家搜索接口（该接口不返回 CORS 头，但支持 JSONP 的 callback 参数，用 <script> 方式即可跨域读取）
+const WE_search = 'https://arena.5eplay.com/api/search/player/1/16?keywords=';
+
+//模式映射表
+const WE_account_status = {
+  '0': '账户正常',
+  '-2': '非法行为封禁',
+  '-4': '开挂封禁',
+  '-5': '作弊关联封禁',
+  '-6': '违规行为',
+  '-7': '恶意行为',
+  '-8': '风险行为'
+};
+
+const statusToImageUrl = {
+  '-2': 'https://oss-arena.5eplay.com/ya_static/images/personalInfo/ban/player_illegality_ban.png',   // 非法行为
+  '-4': 'https://oss-arena.5eplay.com/ya_static/images/personalInfo/ban/player_cheating_ban.png',       // 作弊行为
+  '-5': 'https://oss-arena.5eplay.com/ya_static/images/personalInfo/ban/player_cheating_association_ban.png',  // 作弊关联行为
+  '-6': 'https://oss-arena.5eplay.com/ya_static/images/personalInfo/ban/player_unlawful_act_ban.png',  // 违规行为
+  '-7': 'https://oss-arena.5eplay.com/ya_static/images/personalInfo/ban/player_malicious_act_ban.png',  // 恶意行为
+  '-8': 'https://oss-arena.5eplay.com/ya_static/images/personalInfo/ban/player_risk_ban.png'           // 风险行为
+};
+
+/* ============================================================
+ * 通用请求工具
+ * ============================================================ */
+
+/**
+ * JSONP 请求：把一个接口当成 <script> 加载，从而绕开浏览器的跨域(CORS)限制。
+ * 5E 的搜索接口支持 ?callback=xxx，返回 xxx({...})，这是目前最稳定的调用方式
+ * （之前用的 api.allorigins.win 中转服务已经挂掉了，会返回 HTTP 522）。
+ */
+let __jsonpSeed = 0;
+function jsonpRequest(url, options) {
+  const opts = options || {};
+  const timeout = opts.timeout || 12000;
+  const callbackParam = opts.callbackParam || 'callback';
+
+  return new Promise((resolve, reject) => {
+    const cbName = `__we5ejsonp_${Date.now()}_${++__jsonpSeed}`;
+    const script = document.createElement('script');
+    let settled = false;
+    let timer = null;
+
+    const cleanup = () => {
+      if (timer) clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
+      try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+    };
+
+    const finish = (err, data) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (err) reject(err); else resolve(data);
+    };
+
+    window[cbName] = (data) => finish(null, data);
+    script.onerror = () => finish(new Error('JSONP 请求失败'));
+    timer = setTimeout(() => finish(new Error('JSONP 请求超时')), timeout);
+    script.src = `${url}${url.indexOf('?') > -1 ? '&' : '?'}${callbackParam}=${cbName}`;
+    (document.head || document.documentElement).appendChild(script);
+  });
+}
+
+/** 带超时的 fetch，避免接口无响应时页面一直转圈 */
+function requestJson(url, options, timeout) {
+  const opt = Object.assign({ method: 'GET' }, options || {});
+  const ms = timeout || 20000;
+
+  return new Promise((resolve, reject) => {
+    let timer = null;
+    if (typeof AbortController !== 'undefined') {
+      const ctrl = new AbortController();
+      opt.signal = ctrl.signal;
+      timer = setTimeout(() => ctrl.abort(), ms);
+    }
+    fetch(url, opt)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+      })
+      .then(data => { if (timer) clearTimeout(timer); resolve(data); })
+      .catch(error => { if (timer) clearTimeout(timer); reject(error); });
+  });
+}
+
+/** 账号状态数字/字符串 -> 中文描述 */
+function getAccountStatusText(status) {
+  if (status === null || typeof status === 'undefined' || status === '') return '未知状态';
+  return WE_account_status[String(status)] || '未知状态';
+}
+
+/* ============================================================
+ * 5E接口函数
+ * ============================================================ */
+
+/**
+ * 按昵称搜索5E玩家。
+ * 说明：原实现走 https://api.allorigins.win/get?url=... 中转，该服务已失效(522)，
+ * 现在改为 JSONP 直连 5E 官方搜索接口，失败时自动重试并兜底直连。
+ */
+async function get_player(keyword) {
+  const targetLink = `${WE_search}${encodeURIComponent(keyword)}`;
+
+  const attempts = [
+    () => jsonpRequest(targetLink, { timeout: 12000 }),
+    () => jsonpRequest(targetLink, { timeout: 12000 }),
+    () => requestJson(targetLink, {}, 10000)
+  ];
+
+  for (let i = 0; i < attempts.length; i++) {
+    try {
+      const data = await attempts[i]();
+      if (data && typeof data === 'object' &&
+          ('data' in data || 'errcode' in data || 'success' in data)) {
+        return data; // 返回解析后的数据，供后续 .then/await 使用
+      }
+      console.warn(`⚠️ 第${i + 1}次搜索返回数据结构异常:`, data);
+    } catch (error) {
+      console.warn(`⚠️ 第${i + 1}次搜索请求失败:`, error);
+    }
+  }
+
+  showCopyToast('数据请求超时了Q*Q请稍后重试', 'error', 'color: #9E9E9E;');
+  console.error('❌ 访问失败：搜索接口连续重试仍不可用');
+  return null; // 错误时返回 null，避免后续报错
+}
+
+function get_5Ename(steamId) {
+  if (!steamId) return Promise.resolve(null);
+  const steamNameapi = `${WE_steamName}${steamId}`;
+  return requestJson(steamNameapi, {}, 15000)
+    .then(postData => {
+      return postData && postData.data ? postData.data.username : null;
+    })
+    .catch(error => {
+      return null;
+    });
+}
+
+/**
+ * 通过 SteamID 反查 5E 账号（用于「只给 SteamID 查双平台」）。
+ * @returns {Promise<{username:string, avatar:string|null}|null>}
+ */
+function get_5EUserBySteamId(steamId) {
+  if (!steamId) return Promise.resolve(null);
+  return requestJson(`${WE_steamName}${steamId}`, {}, 15000)
+    .then(postData => {
+      const d = postData && postData.data;
+      if (!d || !d.username) return null;
+      return { username: d.username, avatar: d.avatar || null };
+    })
+    .catch(error => {
+      console.warn('❌ 通过 SteamID 反查 5E 昵称失败：', error);
+      return null;
+    });
+}
+
+function get_uuid(domain) {
+  //获取用户uuid
+  if (!domain) return Promise.resolve('获取失败');
+  const header_ = {
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "zh-cn",
+    "authorization": "",
+    "content-type": "application/json",
+    "sec-ch-ua": "\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "x-ca-key": "5eplay",
+    "x-ca-signature": "pm/c+nYSScWXLOYG7WCczBallQAPFsQ+mu3szgvr7xg=",
+    "x-ca-signature-headers": "Accept-Language,Authorization",
+    "x-ca-signature-method": "HmacSHA256"
+  };
+  return requestJson(WE_idTransfer, {
+    method: 'POST',
+    headers: header_,
+    body: JSON.stringify({ 'trans': { 'domain': domain } })
+  }, 20000)
+    .then(PostData => {
+      if (PostData && PostData.data && PostData.data.uuid) {
+        return PostData.data.uuid;
+      }
+      console.warn('获取 UUID 数据结构异常:', PostData);
+      return '获取失败';
+    })
+    .catch(error => {
+      console.error('❌ 获取 UUID 失败：', error);
+      return '获取失败';
+    });
+}
+
+/**
+ * 5E 历史最高段位（最佳赛季）。
+ * 返回：{best_season, elo, rank, rating, rws, adr, match_total, win_total, loss_total, tie_total, level_id_9 ...}
+ */
+function get_best_season(uuid) {
+  if (!uuid || uuid === '获取失败') return Promise.resolve(null);
+  const url = WE_best_season + encodeURIComponent(uuid);
+  return requestJson(url, {}, 20000)
+    .then(postData => {
+      const d = postData && postData.data;
+      if (!d || !d.best_season) return null;
+      return d;
+    })
+    .catch(error => {
+      console.error('❌ 获取历史最高赛季失败：', error);
+      return null;
+    });
+}
+
+function get_macthlist(uuid) {
+  if (!uuid || uuid === '获取失败') return Promise.resolve(null);
+  const params = {
+    'match_type': -1,
+    'page': 1,
+    'date': 0,
+    'start_time': 0,
+    'end_time': 0,
+    'uuid': uuid,
+    'limit': 100, // 只需要最近若干场，取第一场即可定位 SteamID，拉全量太慢
+    'cs_type': 0,
+  };
+  const queryString = new URLSearchParams(params).toString();
+  const targetUrl = `${WE_macthlist_api}?${queryString}`;
+  // 5E 的 game_mode：6=优先排位，24/103=其他排位模式，优先取这些模式的对局
+  const preferModes = ['6', '24', '103'];
+
+  return requestJson(targetUrl, { method: 'GET' }, 25000)
+    .then(proxydata => {
+      const list = proxydata && Array.isArray(proxydata.data) ? proxydata.data : null;
+      if (!list || list.length === 0) return null;
+      const picked = list.find(item => item && preferModes.indexOf(String(item.game_mode)) > -1);
+      if (picked && picked.match_id) return picked.match_id;
+      // 没有匹配到指定模式时，用最近一场对局兜底（同样能拿到 SteamID）
+      return list[0] && list[0].match_id ? list[0].match_id : null;
+    })
+    .catch(error => {
+      console.error('❌ 获取比赛列表失败：', error);
+      return null;
+    });
+}
+
+function get_home(uuid) {
+  if (!uuid || uuid === '获取失败') return Promise.resolve(null);
+  const homeURL = WE_home + encodeURIComponent(uuid);
+  return requestJson(homeURL, {}, 20000)
+    .then(postData => {
+      if (postData && postData.data && postData.data.season_data) {
+        const seasonData = postData.data.season_data['9'] || postData.data.season_data[9];
+        if (seasonData) return seasonData;
+      }
+      return null;
+    })
+    .catch(error => {
+      console.error('❌ 获取主页数据失败：', error);
+      return null;
+    });
+}
+
+/**
+ * 获取玩家基础数据（账号状态、昵称、头像等）。
+ * 说明：老接口 /userinterface/pt/v1/userinterface/header/{uuid} 已下线(404)，
+ * 新的公开接口是 /reddot_proxy/http/api/data/player?uuid=xxx 。
+ * 注册时间、信誉分、违规记录等字段现在只有登录后（userauthinterface/header）才返回，
+ * 未登录时这里返回 null，页面会显示“未公开”。
+ */
+function get_userData(uuid) {
+  if (!uuid || uuid === '获取失败') return Promise.resolve(null);
+  const userinterfaceUrl = WE_userData + encodeURIComponent(uuid);
+  return requestJson(userinterfaceUrl, {}, 20000)
+    .then(postData => {
+      const inner = postData && postData.data && postData.data.data;
+      const user = inner && inner.user;
+      if (!user) return null;
+      const levelInfo = (inner.data && inner.data.level_info) || inner.level_info || {};
+      return {
+        account_status: typeof user.account_status === 'undefined' ? null : user.account_status,
+        username: user.username || null,
+        avatar_url: user.avatar_url || null,
+        user_title: user.user_title || null,
+        // 以下字段新版公开接口不再返回，保留为 null 以便页面做兜底显示
+        reg_date: typeof user.reg_date === 'undefined' ? null : user.reg_date,
+        credit_score: typeof user.credit_score === 'undefined' ? null : user.credit_score,
+        report_count: typeof user.report_count === 'undefined' ? null : user.report_count,
+        match_time_total: typeof user.match_time_total === 'undefined' ? null : user.match_time_total,
+        level_info: levelInfo
+      };
+    })
+    .catch(error => {
+      console.error('❌ 获取用户状态数据失败：', error);
+      return null;
+    });
+}
+
+function get_steamID(matchId, targetUuid) {
+  if (!matchId || !targetUuid || targetUuid === '获取失败') return Promise.resolve(null);
+  const targetUrl = `${WE_match}${matchId}`;
+  return requestJson(targetUrl, {}, 25000)
+    .then(postData => {
+      if (!postData || !postData.data) return null;
+      const group1 = postData.data.group_1 || [];
+      const group2 = postData.data.group_2 || [];
+      const group = group1.concat(group2);
+      for (let i = 0; i < group.length; i++) {
+        const player = group[i];
+        if (player && player.user_info && player.user_info.user_data &&
+            player.user_info.user_data.uuid === targetUuid &&
+            player.user_info.user_data.steam && player.user_info.user_data.steam.steamId) {
+          return player.user_info.user_data.steam.steamId;
+        }
+      }
+      return null;
+    })
+    .catch(error => {
+      console.error("❌ 获取 SteamID 失败:", error);
+      return null;
+    });
+}
+
+function get_steamData(steamId) {//获取steam社区数据
+  if (!steamId) return Promise.resolve(null);
+  const url = `https://download.imagedownloader.online/?url=https://steamrepcn.com/profiles/${steamId}`;
+
+  const parse = (html) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const listContainer = doc.querySelector('div[class="flex w-full justify-between"]');
+    const avatarContainer = doc.querySelector('div[class="flex px-5"]');
+    const steamNameElement = doc.querySelector('p[class="mb-2 truncate text-4xl font-bold leading-tight"]');
+    if (!listContainer || !avatarContainer || !steamNameElement) {
+      return null;
+    }
+    const listText = listContainer.querySelectorAll('div[class="flex flex-col"]');
+    const SteamifonData = {};
+    SteamifonData['steam_avatar'] = avatarContainer.querySelector('img').src || null;
+    SteamifonData['SteamName'] = steamNameElement.getAttribute('title') || null;
+    listText.forEach(element => {
+      try {
+        const mlElement = element.querySelector('p[class="ml-2"]');
+        const textElement = element.querySelector('p[class="ml-2 text-gray-400 text-sm"]');
+        if (mlElement && textElement) {
+          const ml = mlElement.innerText.trim();
+          const text = textElement.innerText.trim();
+          SteamifonData[ml] = text;
+        }
+      } catch (e) {}
+    });
+    return SteamifonData;
+  };
+
+  // steamrepcn 的代理偶尔会抽风（超时 / 返回空页），失败重试一次
+  const attemptFetch = () => {
+    const opt = {};
+    if (typeof AbortController !== 'undefined') {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 20000);
+      opt.signal = ctrl.signal;
+    }
+    return fetch(url, opt).then(response => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
+    });
+  };
+
+  return attemptFetch()
+    .then(html => parse(html))
+    .then(data => {
+      if (data) return data;
+      throw new Error('Steam 页面解析失败');
+    })
+    .catch(error => {
+      console.warn('⚠️ 获取 Steam 数据失败，1 秒后重试一次:', error && error.message);
+      return new Promise(resolve => setTimeout(resolve, 1000))
+        .then(attemptFetch)
+        .then(html => parse(html))
+        .catch(err => {
+          console.error('❌ 获取 Steam 数据失败:', err);
+          return null;
+        });
+    });
+}
+
+//工具(转换时间戳)
+function convertTimestamp(timestamp) {
+  if (!timestamp) return "未知";
+  const num = Number(timestamp);
+  if (!num) return "未知";
+  const ms = num.toString().length === 10 ? num * 1000 : num;
+  return new Date(ms).toLocaleString('zh-CN', {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+</script>
+<script>
+/* ================= stecit/perfectApi.js ================= */
+
+const modeDict = {
+    "全部模式": -1, "天梯组排": -12, "天梯绿色": -120, "官匹pro": 41, "天梯单排": -46, "单排绿色": -460
+};
+
+const API_URLS = {
+    getInGameUserSetBySid:"https://appactivity.wmpvp.com/steamcn/app/realtime/getInGameUserSetBySid?steamIds=",//获取玩家游戏状态 [在线/离线] [国服/平台]
+    SEARCH: "https://appengine.wmpvp.com/steamcn/app/search/user",//完美昵称搜索接口
+    ACCOUNTS: "https://appengine.wmpvp.com/steamcn/community/user/getNewUserList",//完美绑定账号关联接口
+    FORBID: "https://api.wmpvp.com/api/csgo/home/user/forbid",//玩家封禁状态获取接口
+    MATCHES: "https://api.wmpvp.com/api/csgo/home/match/list",//玩家比赛记录数据接口
+    STATS: "https://api.wmpvp.com/api/csgo/home/pvp/detailStats",//完美平台数据获取接口
+    INVENTORY: "https://gwapi.pwesports.cn/appdecoration/steamcn/csgo/decoration/getSteamInventoryPreview",//玩家CS2饰品库存数据接口
+    OFFICIAL_STATS: "https://api.wmpvp.com/api/csgo/home/official/detailStats",//玩家国服数据获取接口
+    CSINFO: "https://gwapi.pwesports.cn/appdatacenter/csgo/official/fall/userCsgoInfo",//获取优先状态
+    STEAM_DATA: "https://steamrepcn.com/profiles/"//steam社区数据获取接口
+};
+
+const mockUserData = [
+    { 'steamID': '76561199721184339', 'userID': '1026293222', 'token': '7667e792473259e7e40cd7658b1681a0d2a7ce6c' },
+    { 'steamID': '76561199697817037', 'userID': '1022646069', 'token': '8dfa964afe38a638488b66f55b32d601e1a4e79a' },
+    { 'steamID': '76561199722026486', 'userID': '1026158310', 'token': '69b506ce5b3be3ba49622305851baf2b72df1ed1'}
+];
+
+function getRandomUser() {
+    return mockUserData[Math.floor(Math.random() * mockUserData.length)];
+}
+
+function getHeaders(token) {
+    const headers = {
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "zh-CN,zh;q=0.9",
+        "content-type": "application/json",
+        "sec-ch-ua": "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "Referer": "https://csgo.wmpvp.com/",
+        'appversion': '3.6.2.189',
+        'device': 'KGPSz1754474645YpsvmPeeMtb',
+        'gameType': '2',
+        'gameTypeStr': '2',
+        'platform': 'android',
+        'appTheme': '0',
+        'Connection': 'Keep-Alive',
+        'Accept-Encoding': 'gzip',
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+    };
+    if (token) headers["token"] = `${token}`;
+    return headers;
+}
+
+/* ============================================================
+ * 5E 段位规则（注意：和完美平台不是一套）
+ *   0-1200 D        1201-1350 C     1351-1500 C+    1501-1600 C++
+ *   1601-1750 B     1751-1900 B+    1901-2000 B++   2001-2150 A
+ *   2151-2300 A+    2301-2400 A++
+ *   2400 以上不再看分数，改看星星：0-19 星 S，20-39 星 SS，40 星以上 SSS
+ * 区间都是闭区间。
+ * ============================================================ */
+const WE_RANK_TIERS = [
+    { max: 1200, name: 'D' },
+    { max: 1350, name: 'C' },
+    { max: 1500, name: 'C+' },
+    { max: 1600, name: 'C++' },
+    { max: 1750, name: 'B' },
+    { max: 1900, name: 'B+' },
+    { max: 2000, name: 'B++' },
+    { max: 2150, name: 'A' },
+    { max: 2300, name: 'A+' },
+    { max: 2400, name: 'A++' }
+];
+
+/** S 段位以上的星级 -> 段位名 */
+function weStarRankText(stars) {
+    const st = Number(stars) || 0;
+    if (st >= 40) return 'SSS';
+    if (st >= 20) return 'SS';
+    return 'S';
+}
+
+/** 5E 是否已经是 S 段位（2401 分及以上） */
+function weIsSTier(score) {
+    return (Number(score) || 0) > 2400;
+}
+
+/**
+ * 5E 段位文本
+ * @param {number} score 5E 排位分
+ * @param {number} stars S 段位的星星数量（只需分数 > 2400 时传）
+ */
+function getRankText(score, stars) {
+    const s = Number(score) || 0;
+    if (s <= 0) return '未定级';
+    if (s > 2400) return weStarRankText(stars);
+    for (let i = 0; i < WE_RANK_TIERS.length; i++) {
+        if (s <= WE_RANK_TIERS[i].max) return WE_RANK_TIERS[i].name;
+    }
+    return '未定级';
+}
+
+// 根据分数获取段位颜色
+function getRankColor(score, stars) {
+    const s = Number(score) || 0;
+    if (s <= 0) return "#808080";        // 未定级 - 灰
+    if (s <= 1200) return "#4A6CF7";     // D   - 蓝
+    if (s <= 1350) return "#5B6CFF";     // C
+    if (s <= 1500) return "#7C5CFF";     // C+
+    if (s <= 1600) return "#9333EA";     // C++ - 紫
+    if (s <= 1750) return "#C41E3A";     // B   - 红
+    if (s <= 1900) return "#E03C4F";     // B+
+    if (s <= 2000) return "#FF5700";     // B++ - 橙红
+    if (s <= 2150) return "#FF7A00";     // A   - 橙
+    if (s <= 2300) return "#F9B641";     // A+  - 金橙
+    if (s <= 2400) return "#FFB300";     // A++ - 亮金
+    return "#FFD700";                    // S / SS / SSS - 金
+}
+
+// 根据SteamID搜索完美平台用户信息
+async function searchUsers(steamId) {
+    if (!steamId || ["N/A", "未知", ""].includes(steamId.toString().trim())) {
+        return null;
+    }
+    try {
+        const { token } = getRandomUser();
+        const headers = getHeaders(token);
+        const response = await fetch(API_URLS.SEARCH, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+                keyword: steamId,
+                page: 1,
+                pageSize: 10,
+                searchType: 1 // 1 表示按 SteamID 搜索
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        // 检查返回数据结构是否符合预期
+        if (data.result) {
+            return data.result; // 返回第一个匹配的用户
+        }
+        return null; // 未找到用户或数据格式不正确
+    } catch (e) {
+        console.error("搜索完美用户错误:", e);
+        return null;
+    }
+}
+
+// 获取完美平台账号封禁信息
+async function getAccountForbidInfo(steamId) {
+    if (!steamId) {
+        return "未知";
+    }
+    try {
+        const { steamID: mySteamId, token } = getRandomUser();
+        const headers = getHeaders(token);
+
+        const response = await fetch(API_URLS.FORBID, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+                toSteamId: steamId,
+                mySteamId: mySteamId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.statusCode === 0 && data.data) {
+            const forbidDetail = data.data;
+            if ([0, null, undefined].indexOf(forbidDetail.pwaBanType) === -1) {
+                const expireDate = timestampToDate(forbidDetail.expireTime);
+                const createDate = timestampToDate(forbidDetail.createTime);
+                const desc = forbidDetail.desc || "未说明封禁原因";
+                return `存在封禁记录\n封禁原因：${desc}\n封禁时间：${createDate}\n解封时间：${expireDate}`;
+            } else {
+                return "状态正常";
+            }
+        } else {
+            return `封禁查询失败：${data.errorMessage || '未知错误'}`;
+        }
+    } catch (e) {
+        console.error("获取封禁信息错误:", e);
+        return "查询失败";
+    }
+}
+
+async function getCsInfo(steamId) {
+    if (!steamId) {
+        return "无法获取优先状态";
+    }
+    try {
+        const { token } = getRandomUser();
+        const params = new URLSearchParams({ steamId: steamId, token: token, darkType: '0' });
+        const response = await fetch(`${API_URLS.CSINFO}?${params.toString()}`, { method: "GET", headers: getHeaders() });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.result && data.result.levelTitle) {
+            return `优先用户 ${data.result.levelTitle}-${data.result.curLevel}级`;
+        }
+        return "非优先用户";
+    } catch (e) {
+        console.error("获取CS信息错误:", e);
+        return "无法获取优先状态";
+    }
+}
+
+async function getPvPStats(steamId) {//获取完美数据
+    if (!steamId || ["N/A", "未知", ""].includes(steamId.toString().trim())) {
+        return null;
+    }
+    try {
+        const { steamID: mySteamId, token } = getRandomUser();
+        const headers = getHeaders(token);
+        const response = await fetch(API_URLS.STATS, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ toSteamId: steamId, mySteamId: mySteamId, accessToken: token })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.statusCode === 0 && data.data) {
+            if (data.data.playTime) {
+                data.data.playTimeHours = parseFloat((data.data.playTime / 3600).toFixed(1));
+            }
+            return data.data;
+        }
+        return null;
+    } catch (e) {
+        console.error("获取国服统计错误:", e);
+        return null;
+    }
+}
+
+async function getOfficialStats(steamId) {
+    //获取国服数据
+    if (!steamId || ["N/A", "未知", ""].includes(steamId.toString().trim())) {
+        return null;
+    }
+    try {
+        const { steamID: mySteamId, token } = getRandomUser();
+        const headers = getHeaders(token);
+        const response = await fetch(API_URLS.OFFICIAL_STATS, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ toSteamId: steamId, mySteamId: mySteamId, accessToken: token })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.statusCode === 0 && data.data) {
+            if (data.data.playTime) {
+                data.data.playTimeHours = parseFloat((data.data.playTime / 3600).toFixed(1));
+            }
+            return data.data;
+        }
+        return null;
+    } catch (e) {
+        console.error("获取国服统计错误:", e);
+        return null;
+    }
+}
+
+// 获取完美平台比赛数据
+async function getAccountMatches(steamId) {
+    if (!steamId || ["N/A", "未知", ""].includes(steamId.toString().trim())) {
+        return [];
+    }
+    try {
+        const { steamID: mySteamId, token } = getRandomUser();
+        const headers = getHeaders(token);
+        const response = await fetch(API_URLS.MATCHES, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+                mySteamId: mySteamId,
+                toSteamId: steamId,
+                csgoSeasonId: "recent",
+                pvpType: modeDict["全部模式"],
+                page: 1,
+                pageSize: 9999,
+                dataSource: 3
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.statusCode === 0 && data.data && data.data.matchList) {
+            return data.data.matchList;
+        }
+        return [];
+    } catch (e) {
+        console.error("获取比赛数据错误:", e);
+        return [];
+    }
+}
+
+// 从 searchUsers 的结果中获取最高评分
+function getUserMaxScore(perfectUserInfo) {
+
+    if (!perfectUserInfo || !Array.isArray(perfectUserInfo) || perfectUserInfo.length === 0) {
+        return "无数据";
+    }
+    let PvPScore = perfectUserInfo
+        .map(Score => Number(Score && Score.pvpScore))
+        .filter(score => !isNaN(score) && isFinite(score));
+    if (PvPScore.length === 0) {
+        return "无数据";
+    }
+    let MaxScore = Math.max(...PvPScore);
+    console.log(MaxScore);
+    return MaxScore;
+}
+
+// 时间戳转换函数 (原代码中缺失)
+function timestampToDate(timestamp) {
+    if (!timestamp) return "未知";
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+}
+
+/* ============================================================
+ * 以下为「5E × 完美 双平台合并查询」新增的完美平台能力
+ * （函数名统一加 pw 前缀或使用新名字，避免影响旧页面）
+ * ============================================================ */
+
+/**
+ * 按「完美昵称」或「SteamID」搜索完美用户。
+ * @param {string} keyword 昵称或 17 位 SteamID
+ * @param {boolean} bySteamId true=按 SteamID 精确搜索（searchType:1），false=按昵称搜索
+ * @returns {Promise<Array>} 结果数组 [{steamId, pvpNickName, appNickName, pvpAvatar, pvpScore, userId}]
+ */
+async function pwSearchUser(keyword, bySteamId) {
+    const kw = String(keyword || '').trim();
+    if (!kw) return [];
+    try {
+        const { token } = getRandomUser();
+        const body = { keyword: kw, page: 1, pageSize: bySteamId ? 10 : 20 };
+        if (bySteamId) body.searchType = 1;
+        const response = await fetch(API_URLS.SEARCH, {
+            method: "POST",
+            headers: getHeaders(token),
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data && Array.isArray(data.result)) return data.result;
+        return [];
+    } catch (e) {
+        console.error("完美搜索错误:", e);
+        return [];
+    }
+}
+
+/* ============================================================
+ * 完美段位规则（和 5E 不是一套，闭区间）
+ *   D      <=1000         C      1001-1150     C+     1151-1300
+ *   金C+(C++) 1301-1450   B      1451-1600     B+     1601-1750
+ *   B++    1751-1900      A      1901-2050     A+     2051-2200
+ *   A++    2201-2400      2401 及以上为 S，不再显示分数，改看星星：
+ *   青铜S 0-9 星，黄金S 10-24 星，钻石S 25-49 星，魔王S 50 星以上
+ * ============================================================ */
+const PW_RANK_TIERS = [
+    { max: 1000, name: 'D' },
+    { max: 1150, name: 'C' },
+    { max: 1300, name: 'C+' },
+    { max: 1450, name: '金C+' },
+    { max: 1600, name: 'B' },
+    { max: 1750, name: 'B+' },
+    { max: 1900, name: 'B++' },
+    { max: 2050, name: 'A' },
+    { max: 2200, name: 'A+' },
+    { max: 2400, name: 'A++' }
+];
+
+/** 完美 S 段位按星星细分 */
+function pwStarRankText(stars) {
+    const st = Number(stars) || 0;
+    if (st >= 50) return '魔王S';
+    if (st >= 25) return '钻石S';
+    if (st >= 10) return '黄金S';
+    return '青铜S';
+}
+
+/** 完美是否已经是 S 段位（2401 分及以上） */
+function pwIsSTier(pvpScore) {
+    return (Number(pvpScore) || 0) > 2400;
+}
+
+/** 完美段位文本（S 段位需要传星星数） */
+function pwRankText(pvpScore, stars) {
+    const s = Number(pvpScore) || 0;
+    if (s <= 0) return "未定级";
+    if (s > 2400) return pwStarRankText(stars);
+    for (let i = 0; i < PW_RANK_TIERS.length; i++) {
+        if (s <= PW_RANK_TIERS[i].max) return PW_RANK_TIERS[i].name;
+    }
+    return "未定级";
+}
+
+/** 完美段位颜色 */
+function pwRankColor(pvpScore, stars) {
+    const s = Number(pvpScore) || 0;
+    if (s <= 0) return "#8fa3b8";
+    if (s > 2400) {
+        const st = Number(stars) || 0;
+        if (st >= 50) return "#F53F3F";     // 魔王S
+        if (st >= 25) return "#7DD3FC";     // 钻石S
+        if (st >= 10) return "#FFD700";     // 黄金S
+        return "#CD7F32";                   // 青铜S
+    }
+    if (s <= 1000) return "#4A6CF7";    // D
+    if (s <= 1150) return "#5B6CFF";    // C
+    if (s <= 1300) return "#7C5CFF";    // C+
+    if (s <= 1450) return "#9333EA";    // 金C+
+    if (s <= 1600) return "#C41E3A";    // B
+    if (s <= 1750) return "#E03C4F";    // B+
+    if (s <= 1900) return "#FF5700";    // B++
+    if (s <= 2050) return "#FF7A00";    // A
+    if (s <= 2200) return "#F9B641";    // A+
+    return "#FFB300";                   // A++
+}
+
+/** 获取该完美用户绑定的所有 Steam 账号 */
+async function getUserAccounts(targetUserId) {
+    if (!targetUserId) return [];
+    try {
+        const { token, userID } = getRandomUser();
+        const params = new URLSearchParams({
+            appId: 2,
+            token: token,
+            userId: userID,
+            toUserId: targetUserId,
+            needDouyu: false
+        });
+        const response = await fetch(`${API_URLS.ACCOUNTS}?${params.toString()}`, {
+            method: "GET",
+            headers: getHeaders()
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data && data.code === 1 && data.result && Array.isArray(data.result.userList)) {
+            return data.result.userList;
+        }
+        return [];
+    } catch (e) {
+        console.error("获取绑定账号错误:", e);
+        return [];
+    }
+}
+
+/** 是否正在完美平台游戏中 */
+async function getOnlineStatus(steamId) {
+    if (!steamId) return { online: false, duration: 0 };
+    try {
+        const response = await fetch(`${API_URLS.getInGameUserSetBySid}${steamId}`, {
+            method: "GET",
+            headers: getHeaders()
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data && data.code === 1 && data.result) {
+            const isOnline = data.result.idSet && data.result.idSet.indexOf(steamId) > -1;
+            const duration = (data.result.userRealTimeMap && data.result.userRealTimeMap[steamId]) || 0;
+            return { online: !!isOnline, duration };
+        }
+        return { online: false, duration: 0 };
+    } catch (e) {
+        console.error("获取在线状态错误:", e);
+        return { online: false, duration: 0 };
+    }
+}
+
+/** 黑产小号刷分检测（与完美成分查询同逻辑） */
+function detectBlackAccount(matches) {
+    if (!matches || matches.length === 0) {
+        return { isBlack: false, details: "无比赛数据，无法检测" };
+    }
+    const seenStartTimes = [];
+    for (const match of matches) {
+        const kill = match.kill || 0;
+        const assist = match.assist || 0;
+        const rating = match.pwRating || 0;
+        if (rating <= 0.7 && assist <= 1 && (kill === 0 || kill < 3)) {
+            const date = match.startTime ? String(match.startTime).split(" ")[0] : "";
+            if (date) seenStartTimes.push(date);
+        }
+    }
+    if (seenStartTimes.length >= 4) {
+        const dateCount = {};
+        for (const day of seenStartTimes) dateCount[day] = (dateCount[day] || 0) + 1;
+        for (const day of Object.keys(dateCount)) {
+            if (dateCount[day] >= 3) {
+                return { isBlack: true, details: `疑似黑产小号刷分（${day} 当天就有 ${dateCount[day]} 场）` };
+            }
+        }
+    }
+    return { isBlack: false, details: "未检测到黑产特征" };
+}
+
+/** 最近比赛里的最高完美分 */
+function getMaxPvpScoreFromMatches(matches) {
+    if (!matches || matches.length === 0) return null;
+    let maxScore = 0;
+    for (const match of matches) {
+        const s = Number(match.pvpScore) || 0;
+        if (s > maxScore) maxScore = s;
+    }
+    return maxScore || null;
+}
+
+/** 最近比赛的平均击杀 */
+function getAvgKillFromMatches(matches) {
+    if (!matches || matches.length === 0) return null;
+    let kill = 0, death = 0;
+    for (const match of matches) {
+        kill += Number(match.kill) || 0;
+        death += Number(match.death) || 0;
+    }
+    return {
+        avgKill: parseFloat((kill / matches.length).toFixed(1)),
+        avgDeath: parseFloat((death / matches.length).toFixed(1)),
+        kd: death > 0 ? parseFloat((kill / death).toFixed(2)) : null
+    };
+}
+
+/* ---------- 完美历史最高段位（把每个赛季都扫一遍取最高） ---------- */
+
+const PERFECT_SEASON_MAX = 30;        // 完美赛季编号上限（2026 年当前约为 S25，留些余量）
+const __perfectBestSeasonCache = {};  // steamId -> Promise
+
+/** 取某一个赛季的天梯数据（seasonId 形如 S24） */
+async function getPerfectSeasonStats(steamId, seasonId) {
+    const { steamID: mySteamId, token } = getRandomUser();
+    const response = await fetch(API_URLS.STATS, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify({
+            toSteamId: steamId,
+            mySteamId: mySteamId,
+            accessToken: token,
+            csgoSeasonId: seasonId,
+            pvpType: -1,
+            page: 1,
+            pageSize: 3,
+            dataSource: 3
+        })
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    if (data && data.statusCode === 0 && data.data) return data.data;
+    return null;
+}
+
+/**
+ * 完美历史最高段位：并行扫描 S1..S30，取 pvpScore 最高的赛季。
+ * 注意：服务端对不存在的赛季会回退成「最近比赛」的数据，所以只认分数 > 0 的赛季。
+ * @returns {Promise<{seasonId:string, score:number, data:Object}|null>}
+ */
+function getPerfectBestSeason(steamId) {
+    if (!steamId) return Promise.resolve(null);
+    if (__perfectBestSeasonCache[steamId]) return __perfectBestSeasonCache[steamId];
+
+    let cached = null;
+    try {
+        const raw = sessionStorage.getItem('pw-best-season:' + steamId);
+        if (raw) cached = JSON.parse(raw);
+    } catch (e) { /* 忽略隐私模式下的异常 */ }
+    if (cached && cached.seasonId) {
+        __perfectBestSeasonCache[steamId] = Promise.resolve(cached);
+        return __perfectBestSeasonCache[steamId];
+    }
+
+    const seasons = [];
+    for (let i = 1; i <= PERFECT_SEASON_MAX; i++) seasons.push('S' + i);
+
+    const run = (async () => {
+        const all = [];
+        // 分批发，避免一次性打太多请求
+        for (let i = 0; i < seasons.length; i += 10) {
+            const chunk = seasons.slice(i, i + 10);
+            const part = await Promise.all(chunk.map(async (seasonId) => {
+                try {
+                    const d = await getPerfectSeasonStats(steamId, seasonId);
+                    if (!d) return null;
+                    const score = Number(d.pvpScore) || 0;
+                    if (score <= 0) return null;                       // 未定级 / 赛季不存在
+                    if (d.seasonId && String(d.seasonId) !== seasonId) return null; // 回退数据，丢弃
+                    return { seasonId, score, data: d };
+                } catch (e) {
+                    return null;
+                }
+            }));
+            for (const item of part) if (item) all.push(item);
+        }
+        if (all.length === 0) return null;
+        all.sort((a, b) => b.score - a.score);
+        const best = all[0];
+        try {
+            sessionStorage.setItem('pw-best-season:' + steamId, JSON.stringify(best));
+        } catch (e) { /* 超配额就算了 */ }
+        return best;
+    })();
+
+    __perfectBestSeasonCache[steamId] = run;
+    return run;
+}
+</script>
+<script>
+/* ================= stecit/copy-toast.js ================= */
+(function() {
+    'use strict';
+
+    // 等待整个 HTML 加载 完成
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // 1. 注入 CSS 样式
+        const style = document.createElement('style');
+        style.textContent = `
+            /* 父容器，用于将提示框居中 */
+            .toast-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center; /* 水平居中 */
+                align-items: center;     /* 垂直居中 */
+                pointer-events: none;    /* 让鼠标事件穿透过去，不影响页面操作 */
+                z-index: 9999999;        /* 确保在最上层 */
+            }
+
+            /* 核心：复制提示框 (Toast) 样式 */
+            .copy-toast {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+                font-size: 16px;
+                font-weight: 500;
+                color: white;
+                background-color: rgba(30, 30, 30, 0.9); /* 深色半透明背景 */
+                transform: translateY(20px); /* 初始位置向下偏移一点 */
+                opacity: 0;
+                transition: transform 0.3s ease, opacity 0.3s ease;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+
+            .copy-toast.show {
+                transform: translateY(0); /* 移动到居中位置 */
+                opacity: 1;
+            }
+            
+            /* 成功和失败状态只改变图标颜色 */
+            .copy-toast.success svg {
+                color: #4CAF50; /* 绿色图标 */
+            }
+
+            .copy-toast.error svg {
+                color: #F44336; /* 红色图标 */
+            }
+
+            .copy-toast svg {
+                width: 24px;
+                height: 24px;
+                fill: currentColor;
+            }
+        `;
+        document.documentElement.appendChild(style);
+
+        // 2. 创建提示框元素
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+
+        const toast = document.createElement('div');
+        toast.className = 'copy-toast';
+        toast.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path id="toast-icon-path" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span id="toast-message">复制成功</span>
+        `;
+
+        toastContainer.appendChild(toast);
+        document.body.appendChild(toastContainer);
+
+        const iconPath = toast.querySelector('#toast-icon-path');
+        const messageSpan = toast.querySelector('#toast-message');
+
+        // 3. 定义并暴露 showCopyToast 函数到全局
+        window.showCopyToast = function(message, type = 'success') {
+            messageSpan.textContent = message;
+            if (type === 'success') {
+                toast.classList.remove('error');
+                toast.classList.add('success');
+                iconPath.setAttribute('d', 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z');
+            } else if (type === 'error') {
+                toast.classList.remove('success');
+                toast.classList.add('error');
+                iconPath.setAttribute('d', 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z');
+            }
+
+            // 先确保元素是隐藏的，以防连续点击
+            toast.classList.remove('show');
+            // 强制重排，让过渡效果能重新触发
+            void toast.offsetWidth;
+            // 显示提示框
+            toast.classList.add('show');
+
+            // 3 秒后自动隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        };
+        //showCopyToast("你的消息", "success" 或 "error")
+
+    }); // 关闭 DOMContentLoaded 事件监听器
+
+})();
+</script>
+<script>
+/* ================= stecit/app.js ================= */
+/* ============================================================
+ * 5E × 完美 双平台查成分
+ * 特性：
+ *  1. 两个按钮切换「用 5E 昵称查」/「用完美昵称查」；
+ *  2. 输入 76 开头 17 位 SteamID 时，直接同时查两个平台；
+ *  3. 三个平台（5E / 完美 / Steam）各自独立请求，查到哪个就先渲染哪个。
+ * ============================================================ */
+(function () {
+    'use strict';
+
+    const IMG_HOST = 'https://oss-arena.5eplay.com/';   // 5E 头像前缀
+    const STEAM_ID_RE = /^76\d{15}$/;                    // 76 开头共 17 位
+
+    const state = {
+        mode: '5e',    // '5e' | 'perfect'
+        seq: 0,        // 查询序号，用于丢弃过期请求的结果
+        steamId: null,
+        card: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    /* ------------------------- 小工具 ------------------------- */
+
+    function el(tag, cls, text) {
+        const n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text !== undefined && text !== null) n.textContent = text;
+        return n;
+    }
+
+    /** 数字格式化：0 / 非法值返回 null（渲染时会被跳过） */
+    function num(v, digits) {
+        if (v === null || v === undefined || v === '') return null;
+        const n = Number(v);
+        if (!isFinite(n) || n === 0) return null;
+        return digits === undefined ? String(n) : n.toFixed(digits);
+    }
+
+    /** 比例转百分比：0.72 -> 72.0% */
+    function pct(v, digits) {
+        if (v === null || v === undefined || v === '') return null;
+        const n = Number(v);
+        if (!isFinite(n)) return null;
+        return (n <= 1 ? n * 100 : n).toFixed(digits === undefined ? 1 : digits) + '%';
+    }
+
+    /* ------------------------- 卡片 UI ------------------------- */
+
+    /** 历史最高段位的高亮框 */
+    function buildHighlight(h) {
+        const box = el('div', 'hl-box');
+
+        const head = el('div', 'hl-head');
+        const label = el('span', 'hl-label');
+        label.innerHTML = '<i class="fa fa-trophy"></i>';
+        label.append(el('span', null, h.label || '历史最高段位'));
+        head.append(label);
+        if (h.season) head.append(el('span', 'hl-season', `赛季 ${h.season}`));
+        box.append(head);
+
+        const main = el('div', 'flex items-baseline gap-2 flex-wrap');
+        const rankEl = el('span', 'hl-rank', h.rank || '—');
+        if (h.color) rankEl.style.color = h.color;
+        main.append(rankEl);
+        if (h.scoreText) main.append(el('span', 'hl-score', h.scoreText));
+        else if (h.score) main.append(el('span', 'hl-score', `${h.score} 分`));
+        box.append(main);
+
+        const rows = (h.rows || []).filter(r => r && r[1] !== null && r[1] !== undefined && r[1] !== '');
+        if (rows.length) {
+            const grid = el('div', 'hl-grid');
+            rows.forEach(row => {
+                const cell = el('div', 'flex items-baseline justify-between gap-1');
+                cell.append(el('span', 'hl-k', row[0]));
+                cell.append(el('span', 'hl-v', String(row[1])));
+                grid.append(cell);
+            });
+            box.append(grid);
+        }
+        return box;
+    }
+
+    /**
+     * 醒目数据框（本赛季 / 国服的关键数据）
+     * items: [[label, value], ...]，按左→右、上→下排
+     */
+    function buildStatsBox(s) {
+        const items = (s.items || []).filter(it => it && it[1] !== null && it[1] !== undefined && it[1] !== '');
+        if (items.length === 0) return null;
+        const box = el('div', 'stat-box');
+        if (s.title) box.append(el('div', 'stat-box-title', s.title));
+        const grid = el('div', 'stat-grid');
+        items.forEach(([label, value]) => {
+            const cell = el('div', 'stat-cell');
+            cell.append(el('span', 'stat-label', label));
+            cell.append(el('span', 'stat-value', String(value)));
+            grid.append(cell);
+        });
+        box.append(grid);
+        return box;
+    }
+
+    /** 5E 历史最高段位（来自 player/best_season） */
+    function fiveEBestHighlight(b) {
+        if (!b || !Number(b.elo)) return null;
+        const total = Number(b.match_total) || 0;
+        const win = Number(b.win_total) || 0;
+        const winRate = total > 0 ? (win / total * 100).toFixed(1) + '%' : null;
+        const elo = Number(b.elo);
+        const stars = Number(b.star_num) || 0;
+        return {
+            highlight: {
+                label: '5E 历史最高段位',
+                rank: getRankText(elo, stars),
+                scoreText: weIsSTier(elo) ? `${stars} 星` : `${Math.round(elo)} 分`,
+                season: b.best_season,
+                color: getRankColor(elo, stars),
+                rows: [
+                    ['场次', num(total)],
+                    ['胜率', winRate],
+                    ['Rating', num(b.rating, 2)],
+                    ['ADR', num(b.adr, 1)],
+                    ['RWS', num(b.rws, 2)],
+                    ['全服排名', b.rank ? `#${b.rank}` : null]
+                ]
+            }
+        };
+    }
+
+    /** 完美历史最高段位（扫描各赛季得到） */
+    function perfectBestHighlight(bs) {
+        if (!bs || !bs.score) return null;
+        const d = bs.data || {};
+        const stars = Number(d.stars) || 0;
+        return {
+            highlight: {
+                label: '完美历史最高段位',
+                rank: pwRankText(bs.score, stars),
+                scoreText: pwIsSTier(bs.score) ? `${stars} 星` : `${bs.score} 分`,
+                season: bs.seasonId,
+                color: pwRankColor(bs.score, stars),
+                rows: [
+                    ['场次', num(d.cnt)],
+                    ['胜率', pct(d.winRate)],
+                    ['KD', num(d.kd, 2)],
+                    ['Rating', num(d.rating, 2)],
+                    ['ADR', num(d.adr, 1)],
+                    ['RWS', num(d.rws, 2)],
+                    ['爆头率', pct(d.headShotRatio)],
+                    ['WE 评分', num(d.avgWe, 2)]
+                ]
+            }
+        };
+    }
+
+    /** 复制到剪贴板：http（非 localhost）下 navigator.clipboard 不可用，回退到 execCommand */
+    function copyText(text) {
+        if (navigator.clipboard && (window.isSecureContext || location.protocol === 'file:')) {
+            return navigator.clipboard.writeText(text);
+        }
+        return new Promise((resolve, reject) => {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.top = '-1000px';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                ta.setSelectionRange(0, text.length);
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                if (ok) resolve(); else reject(new Error('copy failed'));
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    /** 平台区块（带「查询中 / 已完成 / 无数据」状态 + 平台头像） */
+    function makeSection(title, color) {
+        const root = el('section', 'platform-sec');
+        const head = el('div', 'sec-head');
+        const left = el('div', 'sec-title-wrap');
+
+        const avatar = el('img', 'sec-avatar');
+        avatar.alt = '';
+        avatar.style.display = 'none';
+
+        const dot = el('span', 'sec-dot');
+        dot.style.backgroundColor = color;
+
+        left.append(avatar, dot, el('span', 'sec-title', title));
+        const badge = el('span', 'sec-badge', '等待中');
+        head.append(left, badge);
+
+        const loading = el('div', 'text-xs flex items-center gap-2 py-1');
+        loading.style.color = 'rgba(255,236,220,.5)';
+        const loadingText = el('span', null, '查询中…');
+        loading.append(el('i', 'fa fa-spinner fa-spin'), loadingText);
+
+        const bodyEl = el('div', 'space-y-1 hidden');
+        const noteEl = el('div', 'text-xs py-1 hidden');
+        noteEl.style.color = 'rgba(255,236,220,.5)';
+
+        root.append(head, loading, bodyEl, noteEl);
+
+        const setBadge = (text, tone) => {
+            badge.textContent = text;
+            badge.className = 'sec-badge' + (tone === 'ok' ? ' ok' : tone === 'warn' ? ' warn' : '');
+        };
+        setBadge('等待中', 'gray');
+
+        return {
+            root,
+            /** 平台头像显示在自己的方框里 */
+            setAvatar(url) {
+                if (!url) return;
+                avatar.src = url;
+                avatar.style.display = '';
+                avatar.onerror = () => { avatar.style.display = 'none'; };
+            },
+            start(text) {
+                loading.classList.remove('hidden');
+                bodyEl.classList.add('hidden');
+                noteEl.classList.add('hidden');
+                loadingText.textContent = text || '查询中…';
+                setBadge('查询中', 'gray');
+            },
+            note(text) {
+                loading.classList.add('hidden');
+                bodyEl.classList.add('hidden');
+                noteEl.classList.remove('hidden');
+                noteEl.textContent = text || '暂无数据';
+                setBadge('无数据', 'gray');
+            },
+            done(badgeText, tone, blocks) {
+                bodyEl.innerHTML = '';
+                (blocks || []).forEach(block => {
+                    if (!block) return;
+                    if (block.highlight) {
+                        bodyEl.append(buildHighlight(block.highlight));
+                        return;
+                    }
+                    if (block.statsBox) {
+                        const box = buildStatsBox(block.statsBox);
+                        if (box) bodyEl.append(box);
+                        return;
+                    }
+                    if (block.title) {
+                        bodyEl.append(el('p', 'text-xs font-medium mt-2 mb-1', block.title));
+                    }
+                    (block.rows || []).forEach(row => {
+                        if (!row) return;
+                        const label = row[0], value = row[1], opt = row[2] || {};
+                        if (value === null || value === undefined || value === '') return;
+                        const r = el('div', 'flex items-baseline justify-between gap-3');
+                        r.append(el('span', 'text-xs shrink-0', label));
+                        const v = el('span', 'text-sm font-medium text-right break-all', String(value));
+                        if (opt.cls) v.className += ' ' + opt.cls;
+                        if (opt.color) v.style.color = opt.color;
+                        r.append(v);
+                        bodyEl.append(r);
+                    });
+                    if (block.node) bodyEl.append(block.node);
+                });
+                loading.classList.add('hidden');
+                noteEl.classList.add('hidden');
+                bodyEl.classList.remove('hidden');
+                setBadge(badgeText || '已完成', tone || 'ok');
+            }
+        };
+    }
+
+    /** 玩家卡片骨架：昵称 + SteamID + 三个平台区块（头像显示在各平台方框里） */
+    function createCard(preference) {
+        const root = el('div', 'player-card overflow-hidden');
+
+        const head = el('div', 'p-5');
+        const info = el('div', 'min-w-0');
+        const titleRow = el('div', 'flex flex-wrap items-center gap-2 mb-1');
+        const title = el('span', 'text-lg font-bold', '查询中…');
+        const badge5e = el('span', 'hidden text-xs px-2 py-0.5 rounded-full font-medium text-white');
+        const badgePw = el('span', 'hidden text-xs px-2 py-0.5 rounded-full font-medium text-white');
+        titleRow.append(title, badge5e, badgePw);
+
+        const sidRow = el('div', 'text-sm text-gray-500 dark:text-gray-400');
+        sidRow.append(el('span', null, 'SteamID：'));
+        const sidEl = el('span', 'font-mono text-gray-700 dark:text-gray-200', '解析中…');
+        sidRow.append(sidEl);
+        const copyBtn = el('button', 'ml-2 text-xs text-secondary hover:underline', '复制');
+        sidRow.append(copyBtn);
+
+        const namesEl = el('p', 'text-sm text-gray-500 dark:text-gray-400 mt-1 truncate', '');
+
+        info.append(titleRow, sidRow, namesEl);
+        head.append(info);
+        root.append(head);
+
+        const grid = el('div', 'px-5 pb-5 grid grid-cols-1 lg:grid-cols-3 gap-4');
+        const sections = {
+            '5e': makeSection('5E 平台', '#ff9b48'),
+            perfect: makeSection('完美平台', '#5cb8f5'),
+            steam: makeSection('Steam 平台', '#69c98f')
+        };
+        grid.append(sections['5e'].root, sections.perfect.root, sections.steam.root);
+        root.append(grid);
+
+        const card = {
+            root, title, badge5e, badgePw, sidEl, namesEl, sections,
+            preference: preference || '5e',
+            nick: { '5e': null, perfect: null, steam: null },
+            steamId: null
+        };
+
+        const renderNames = () => {
+            card.namesEl.textContent =
+                `5E：${card.nick['5e'] || '—'} ｜ 完美：${card.nick.perfect || '—'} ｜ Steam：${card.nick.steam || '—'}`;
+            const order = card.preference === 'perfect'
+                ? ['perfect', '5e', 'steam']
+                : ['5e', 'perfect', 'steam'];
+            const first = order.map(k => card.nick[k]).filter(Boolean)[0];
+            card.title.textContent = first || '查询中…';
+        };
+
+        card.setNick = (kind, name) => {
+            if (!name) return;
+            card.nick[kind] = name;
+            renderNames();
+        };
+        card.setSteamId = (sid) => {
+            card.steamId = sid || null;
+            card.sidEl.textContent = sid || '未解析到';
+        };
+        card.setBadge5E = (text, color) => {
+            if (!text) return;
+            card.badge5e.textContent = text;
+            card.badge5e.style.backgroundColor = color || '#ff9b48';
+            card.badge5e.classList.remove('hidden');
+        };
+        card.setBadgePw = (text, color) => {
+            if (!text) return;
+            card.badgePw.textContent = text;
+            card.badgePw.style.backgroundColor = color || '#5cb8f5';
+            card.badgePw.classList.remove('hidden');
+        };
+
+        copyBtn.addEventListener('click', () => {
+            if (!card.steamId) return;
+            copyText(card.steamId).then(
+                () => {
+                    copyBtn.textContent = '已复制';
+                    setTimeout(() => { copyBtn.textContent = '复制'; }, 1500);
+                },
+                () => alert('复制失败，请手动选择复制')
+            );
+        });
+
+        renderNames();
+        return card;
+    }
+
+    /* ------------------------- 三个平台的数据加载 ------------------------- */
+
+    /**
+     * 5E 平台
+     * target: { steamId } 或 { username, domain } 或 { uuid }
+     * @returns {Promise<string|null>} 解析到的 5E uuid
+     */
+    async function load5E(seq, card, target) {
+        const sec = card.sections['5e'];
+        const alive = () => seq === state.seq;
+        sec.start('查询 5E 数据…');
+        try {
+            let uuid = target.uuid || null;
+            let domain = target.domain || null;
+            let username = target.username || null;
+
+            // 只给了 SteamID：先反查 5E 昵称，再按昵称搜索定位 domain
+            if (!uuid && !domain) {
+                const u = await get_5EUserBySteamId(target.steamId);
+                if (!alive()) return null;
+                if (!u) { sec.note('该 Steam 账号未绑定 5E'); return null; }
+                username = u.username;
+                card.setNick('5e', username);
+                if (u.avatar) sec.setAvatar(IMG_HOST + u.avatar);
+
+                const res = await get_player(username);
+                if (!alive()) return null;
+                const list = (res && res.data && res.data.user && res.data.user.list) || [];
+                const hit = list.filter(x => x && x.username === username)[0] || list[0];
+                if (!hit) { sec.note('5E 搜不到这个昵称（可能刚改过名）'); return null; }
+                domain = hit.domain;
+                if (hit.avatar_url) sec.setAvatar(IMG_HOST + hit.avatar_url);
+            }
+
+            if (!uuid) uuid = await get_uuid(domain);
+            if (!alive()) return null;
+            if (!uuid || uuid === '获取失败') { sec.note('5E 账号 ID 获取失败'); return null; }
+
+            const [home, userData, bestSeason] = await Promise.all([
+                get_home(uuid),
+                get_userData(uuid),
+                get_best_season(uuid)
+            ]);
+            if (!alive()) return uuid;
+
+            const nick = (userData && userData.username) || username || '未知';
+            card.setNick('5e', nick);
+            if (userData && userData.avatar_url) sec.setAvatar(IMG_HOST + userData.avatar_url);
+
+            const elo = home ? (Number(home.elo) || 0) : 0;
+            const stars = home ? (Number(home.star_num) || 0) : 0;
+            const eloIsS = weIsSTier(elo);
+            const statusText = getAccountStatusText(userData && userData.account_status);
+            const normal = (statusText === '账户正常' || statusText === '未知状态');
+            if (elo > 0) {
+                card.setBadge5E(`${getRankText(elo, stars)} · ${eloIsS ? `${stars} 星` : Math.round(elo)}`, getRankColor(elo, stars));
+            }
+
+            const hasSeason = !!(home && (Number(home.match_total) > 0 || Number(home.rating) > 0 ||
+                Number(home.adr) > 0 || Number(home.rws) > 0));
+
+            sec.done(normal ? '正常' : '异常', normal ? 'ok' : 'warn', [
+                {
+                    rows: [
+                        ['5E 昵称', nick],
+                        ['账号状态', statusText, { cls: normal ? 'text-green-500' : 'text-red-500' }],
+                        [eloIsS ? '段位星级' : '5E 排位分', elo ? (eloIsS ? `${stars} 星` : Math.round(elo)) : '未定级'],
+                        ['段位', elo ? getRankText(elo, stars) : '未定级']
+                    ]
+                },
+                fiveEBestHighlight(bestSeason),
+                hasSeason ? {
+                    statsBox: {
+                        title: '本赛季（优先排位）',
+                        items: [
+                            ['场次', num(home.match_total)],
+                            ['Rating', num(home.rating, 2)],
+                            ['ADR', num(home.adr, 1)],
+                            ['RWS', num(home.rws, 2)]
+                        ]
+                    }
+                } : null,
+                {
+                    title: '账号资料',
+                    rows: [
+                        ['注册时间', '未公开'],
+                        ['信誉分', '未公开'],
+                        ['违规记录', '未公开']
+                    ]
+                }
+            ]);
+            return uuid;
+        } catch (e) {
+            console.error('5E 数据加载失败:', e);
+            if (alive()) sec.note('5E 数据加载失败');
+            return null;
+        }
+    }
+
+    /** 完美平台（需要 SteamID） */
+    async function loadPerfect(seq, card, target) {
+        const sec = card.sections['perfect'];
+        const alive = () => seq === state.seq;
+        sec.start('查询完美数据…');
+        try {
+            const sid = target.steamId;
+            if (!sid) { sec.note('没有 SteamID，无法查询完美数据'); return; }
+
+            const list = await pwSearchUser(sid, true);
+            if (!alive()) return;
+            const hit = (list || []).filter(x => x && String(x.steamId) === String(sid))[0] || (list || [])[0];
+            if (!hit) { sec.note('该 Steam 账号没有绑定完美平台'); return; }
+
+            const score = Number(hit.pvpScore) || 0;
+            const nick = hit.pvpNickName || hit.appNickName || '未知';
+            card.setNick('perfect', nick);
+            sec.setAvatar(hit.pvpAvatar);
+
+            // 完美 S 段位（2401+）不显示分数，改成显示星星；星星要等 detailStats 回来才拿到
+            const headRows = [
+                ['完美昵称', nick],
+                ['App 昵称', hit.appNickName],
+                ['完美排位分', score || '未定级'],
+                ['完美段位', score ? pwRankText(score, 0) : '未定级']
+            ];
+            const headBlock = { rows: headRows };
+            const applyScoreInfo = (st) => {
+                if (score <= 0) return;
+                const known = (st !== null && st !== undefined);
+                const starsNum = Number(st) || 0;
+                const sTier = pwIsSTier(score);
+                if (sTier) {
+                    headRows[2] = ['段位星级', known ? `${starsNum} 星` : '—'];
+                    headRows[3] = ['完美段位', known ? pwRankText(score, starsNum) : 'S'];
+                    card.setBadgePw(`${known ? pwRankText(score, starsNum) : 'S'} · ${known ? `${starsNum} 星` : '—'}`, pwRankColor(score, starsNum));
+                } else {
+                    headRows[2] = ['完美排位分', score];
+                    headRows[3] = ['完美段位', pwRankText(score, 0)];
+                    card.setBadgePw(`${pwRankText(score, 0)} · ${score}`, pwRankColor(score, 0));
+                }
+            };
+            applyScoreInfo(null);
+
+            // 基础信息先展示，详细数据继续加载
+            sec.done(score ? '已绑定' : '未定级', 'ok', [headBlock]);
+            sec.start('加载完美战绩…');
+
+            // 历史最高段位需要扫赛季，比较慢，先放出去跑，回来再插进页面
+            const bestSeasonPromise = getPerfectBestSeason(sid);
+
+            const [csInfo, forbid, matches, pvp, accounts, online] = await Promise.all([
+                getCsInfo(sid),
+                getAccountForbidInfo(sid),
+                getAccountMatches(sid),
+                getPvPStats(sid),
+                getUserAccounts(hit.userId),
+                getOnlineStatus(sid)
+            ]);
+            if (!alive()) return;
+
+            // S 段位需要星星数，detailStats 里才有
+            applyScoreInfo(pvp ? pvp.stars : null);
+
+            const black = detectBlackAccount(matches);
+            const best = getMaxPvpScoreFromMatches(matches);
+            const avg = getAvgKillFromMatches(matches);
+
+            const blocks = [headBlock];
+
+            // 本赛季关键数据单独做醒目框（会紧跟在历史最高段位框下面）
+            const hasPvp = !!(pvp && Number(pvp.cnt) > 0);
+            if (hasPvp) {
+                blocks.push({
+                    statsBox: {
+                        title: '完美天梯（本赛季）',
+                        items: [
+                            ['场次', num(pvp.cnt)],
+                            ['Rating', num(pvp.rating, 2)],
+                            ['WE 评分', num(pvp.avgWe, 2)],
+                            ['胜率', pct(pvp.winRate)]
+                        ]
+                    }
+                });
+            }
+
+            const accRows = [
+                ['优先状态', csInfo || '未知'],
+                ['封禁状态', forbid || '未知', {
+                    cls: (forbid && forbid.indexOf('状态正常') > -1) ? 'text-green-500' : 'text-red-500'
+                }],
+                ['黑产检测', black.details, { cls: black.isBlack ? 'text-red-500' : 'text-green-500' }],
+                ['当前状态', (online && online.online) ? `完美游戏中（${online.duration} 局）` : '离线']
+            ];
+            if (accounts && accounts.length > 1) accRows.push(['绑定账号', `${accounts.length} 个`]);
+            blocks.push({ title: '账号状态', rows: accRows });
+
+            if (hasPvp) {
+                blocks.push({
+                    title: '完美天梯 · 其它数据',
+                    rows: [
+                        ['KD', num(pvp.kd, 2)],
+                        ['ADR', num(pvp.adr, 1)],
+                        ['RWS', num(pvp.rws, 2)],
+                        ['爆头率', pct(pvp.headShotRatio)]
+                    ]
+                });
+            }
+
+            if (matches && matches.length > 0) {
+                blocks.push({
+                    title: '近期表现',
+                    rows: [
+                        ['近期最高分', best],
+                        ['场均击杀', avg && avg.avgKill],
+                        ['场均死亡', avg && avg.avgDeath],
+                        ['近期 KD', avg && avg.kd]
+                    ]
+                });
+            }
+
+            if (accounts && accounts.length > 1) {
+                const wrap = el('div', 'space-y-1 pt-1');
+                accounts.filter(a => String(a.steamId) !== String(sid)).slice(0, 8).forEach(a => {
+                    const row = el('div', 'flex items-baseline justify-between gap-2');
+                    row.append(el('span', 'text-xs text-gray-500 dark:text-gray-400 truncate', a.nickName || a.pvpNickName || '未知'));
+                    row.append(el('span', 'text-xs font-mono text-gray-400 dark:text-gray-500', String(a.steamId)));
+                    wrap.append(row);
+                });
+                blocks.push({ title: '其它绑定账号', node: wrap });
+            }
+
+            const good = (forbid && forbid.indexOf('状态正常') > -1);
+            const badgeText = good ? '已绑定' : '有异常';
+            const tone = good ? 'ok' : 'warn';
+
+            // 历史最高段位晚一点到，到了再重绘一次（此时完美国服/天梯数据已经展示出来了）
+            let ready = false;
+            let bestBox = null;
+            let bestInserted = false;
+            const insertBest = () => {
+                if (!bestBox || bestInserted) return;
+                blocks.splice(Math.min(1, blocks.length), 0, bestBox);
+                bestInserted = true;
+            };
+            const render = () => {
+                if (!ready || !alive()) return;
+                sec.done(badgeText, tone, blocks);
+            };
+
+            bestSeasonPromise.then(bs => {
+                if (!alive()) return;
+                bestBox = perfectBestHighlight(bs);
+                if (!bestBox) return;
+                insertBest();
+                render();
+            });
+
+            ready = true;
+            insertBest();
+            render();
+        } catch (e) {
+            console.error('完美数据加载失败:', e);
+            if (alive()) sec.note('完美数据加载失败');
+        }
+    }
+
+    /**
+     * 国服数据（完美官方接口返回的 CS 国服战绩）
+     * 场次 / Rating / 胜率 / RWS 单独做醒目框放最下面，其余按普通行列出
+     */
+    function officialStatsBlocks(official) {
+        if (!official) return null;
+        const rows = [
+            ['游戏时长', official.hours ? `${official.hours} 小时` : null],
+            ['KD', num(official.kd, 2)],
+            ['ADR', num(official.adr, 1)],
+            ['爆头率', pct(official.headShotRatio)],
+            ['KAST', (official.kast !== null && official.kast !== undefined) ? `${official.kast}%` : null]
+        ].filter(r => r[1] !== null && r[1] !== undefined && r[1] !== '');
+
+        const out = [];
+        if (rows.length) out.push({ title: '国服数据 · 其它', rows: rows });
+        out.push({
+            statsBox: {
+                title: '国服数据',
+                items: [
+                    ['场次', num(official.cnt)],
+                    ['Rating', num(official.rating, 2)],
+                    ['胜率', pct(official.winRate)],
+                    ['RWS', num(official.rws, 2)]
+                ]
+            }
+        });
+        return out;
+    }
+
+    /**
+     * Steam 平台（steamrepcn 资料 + 国服数据）
+     * 国服数据走完美官方接口，两个请求并行；Steam 资料先到先渲染，国服数据到了再补上。
+     */
+    async function loadSteam(seq, card, sid) {
+        const sec = card.sections['steam'];
+        const alive = () => seq === state.seq;
+        if (!sid) { sec.note('没有 SteamID，无法查询 Steam 资料'); return; }
+        sec.start('查询 Steam 资料…');
+
+        let badge = '正常';
+        let tone = 'ok';
+        let ready = false;
+        let steamBlock = null;
+        let officialBlocks = null;
+
+        const refresh = () => {
+            if (!ready || !alive()) return;
+            const list = [];
+            if (steamBlock) list.push(steamBlock);
+            if (officialBlocks) list.push.apply(list, officialBlocks);
+            sec.done(badge, tone, list);
+        };
+
+        // 国服数据先放出去跑
+        const officialPromise = getOfficialStats(sid).then(official => {
+            if (!alive()) return;
+            officialBlocks = officialStatsBlocks(official);
+            refresh();
+        });
+
+        try {
+            const d = await get_steamData(sid);
+            if (!alive()) return;
+
+            if (d) {
+                card.setNick('steam', d.SteamName);
+                sec.setAvatar(d.steam_avatar);
+
+                const vac = d['VAC 作弊系统检测'] || '未知';
+                const vacOk = (vac === '正常' || vac === '未知');
+                badge = vacOk ? '正常' : 'VAC 异常';
+                tone = vacOk ? 'ok' : 'warn';
+                steamBlock = {
+                    rows: [
+                        ['Steam 昵称', d.SteamName],
+                        ['SteamID', sid],
+                        ['注册时间', d['Steam 注册时间']],
+                        ['社区等级', d['Steam 社区等级']],
+                        ['游戏数量', d['Steam 游戏数']],
+                        ['VAC 状态', vac, { cls: vacOk ? 'text-green-500' : 'text-red-500' }],
+                        ['交易状态', d['Steam 交易状态']]
+                    ]
+                };
+            } else {
+                badge = '部分数据';
+                tone = 'warn';
+                steamBlock = {
+                    rows: [
+                        ['SteamID', sid],
+                        ['Steam 资料', '获取失败']
+                    ]
+                };
+            }
+
+            ready = true;
+            refresh();
+            // 等一等国服数据，回来后再刷新一次
+            await officialPromise;
+        } catch (e) {
+            console.error('Steam 数据加载失败:', e);
+            if (alive()) sec.note('Steam 资料加载失败');
+        }
+    }
+
+    /* ------------------------- 查询流程 ------------------------- */
+
+    function setHint(text) {
+        $('searchHint').textContent = text || '';
+    }
+
+    function resetResults(keepCandidates) {
+        $('resultsContainer').innerHTML = '';
+        $('initialState').classList.add('hidden');
+        state.card = null;
+        if (!keepCandidates) {
+            const bar = $('candidatesBar');
+            bar.innerHTML = '';
+            bar.classList.add('hidden');
+            bar.classList.remove('flex');
+        }
+    }
+
+    function addCard(preference) {
+        const card = createCard(preference);
+        $('resultsContainer').appendChild(card.root);
+        state.card = card;
+        return card;
+    }
+
+    /** 三个平台都没查到昵称时，标题不要一直停在「查询中…」 */
+    function finalizeTitle(card, fallback) {
+        if (card.nick['5e'] || card.nick.perfect || card.nick.steam) return;
+        card.title.textContent = fallback || '未找到玩家';
+    }
+
+    /** 同名候选切换条 */
+    function renderCandidates(list, onPick) {
+        const bar = $('candidatesBar');
+        bar.innerHTML = '';
+        if (!list || list.length <= 1) {
+            bar.classList.add('hidden');
+            bar.classList.remove('flex');
+            return;
+        }
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        const tip = el('span', 'text-xs self-center mr-1', `共 ${list.length} 个匹配：`);
+        tip.style.color = 'rgba(255,236,220,.5)';
+        bar.append(tip);
+
+        const ACTIVE = 'px-3 py-1 rounded-full text-xs border transition-colors';
+        const resetChip = (btn) => {
+            btn.className = ACTIVE;
+            btn.style.background = 'rgba(255,255,255,.06)';
+            btn.style.borderColor = 'rgba(255,170,90,.16)';
+            btn.style.color = 'rgba(255,236,220,.7)';
+        };
+        const activateChip = (btn) => {
+            btn.className = ACTIVE;
+            btn.style.background = '#ff9b48';
+            btn.style.borderColor = '#ff9b48';
+            btn.style.color = '#2a1305';
+            btn.style.fontWeight = '650';
+        };
+        const chipNodes = [];
+        list.slice(0, 12).forEach((item, idx) => {
+            const btn = el('button', null, item.label);
+            resetChip(btn);
+            if (idx === 0) activateChip(btn);
+            btn.addEventListener('click', () => {
+                chipNodes.forEach(resetChip);
+                activateChip(btn);
+                onPick(item);
+            });
+            chipNodes.push(btn);
+            bar.append(btn);
+        });
+    }
+
+    /** 直接按 SteamID 查三平台 */
+    async function runBySteamId(seq, sid, preference) {
+        const card = addCard(preference);
+        card.setSteamId(sid);
+        state.steamId = sid;
+        setHint('已识别 SteamID，正在并行查询 5E / 完美 / Steam…');
+        await Promise.allSettled([
+            load5E(seq, card, { steamId: sid }),
+            loadPerfect(seq, card, { steamId: sid }),
+            loadSteam(seq, card, sid)
+        ]);
+        if (seq !== state.seq) return;
+        finalizeTitle(card, sid);
+        setHint('');
+    }
+
+    /** 用 5E 昵称查：先出 5E 数据，再从对局记录里解析 SteamID 去查另外两个平台 */
+    async function runBy5ENickname(seq, keyword, forced) {
+        let candidates = forced ? [forced] : null;
+
+        if (!candidates) {
+            setHint('正在 5E 搜索昵称…');
+            const res = await get_player(keyword);
+            if (seq !== state.seq) return;
+            const list = (res && res.data && res.data.user && res.data.user.list) || [];
+            if (list.length === 0) { setHint(`5E 没找到「${keyword}」`); return; }
+            candidates = list.map(u => ({
+                label: u.username,
+                username: u.username,
+                domain: u.domain,
+                avatar_url: u.avatar_url
+            }));
+            renderCandidates(candidates, (c) => doSearch(keyword, { candidate: c }));
+        }
+
+        const cand = candidates[0];
+        setHint('');
+        const card = addCard('5e');
+        card.setNick('5e', cand.label);
+        if (cand.avatar_url) card.sections['5e'].setAvatar(IMG_HOST + cand.avatar_url);
+
+        // 1) 先渲染 5E
+        const uuid = await load5E(seq, card, { username: cand.username, domain: cand.domain });
+        if (seq !== state.seq) return;
+
+        // 2) 再从对局记录里拿 SteamID
+        card.sections.perfect.start('从 5E 对局记录解析 SteamID…');
+        card.sections.steam.start('从 5E 对局记录解析 SteamID…');
+
+        let sid = null;
+        try {
+            if (uuid) {
+                const matchId = await get_macthlist(uuid);
+                if (seq !== state.seq) return;
+                if (matchId) sid = await get_steamID(matchId, uuid);
+            }
+        } catch (e) {
+            console.error('解析 SteamID 失败:', e);
+        }
+        if (seq !== state.seq) return;
+
+        if (!sid) {
+            card.sections.perfect.note('没能从 5E 对局记录里解析出 SteamID');
+            card.sections.steam.note('没能从 5E 对局记录里解析出 SteamID');
+            return;
+        }
+
+        card.setSteamId(sid);
+        state.steamId = sid;
+        // 3) 并行查完美 + Steam（各自查到就各自渲染）
+        await Promise.allSettled([
+            loadPerfect(seq, card, { steamId: sid }),
+            loadSteam(seq, card, sid)
+        ]);
+        if (seq === state.seq) finalizeTitle(card, keyword);
+    }
+
+    /** 用完美昵称查：完美搜索结果里自带 SteamID，可以立刻并行查 5E + Steam */
+    async function runByPerfectNickname(seq, keyword, forced) {
+        let candidates = forced ? [forced] : null;
+
+        if (!candidates) {
+            setHint('正在 完美 搜索昵称…');
+            const list = await pwSearchUser(keyword, false);
+            if (seq !== state.seq) return;
+            if (!list || list.length === 0) { setHint(`完美 没找到「${keyword}」`); return; }
+            candidates = list.map(u => ({
+                label: `${u.pvpNickName || u.appNickName || '未知'}（${u.steamId}）`,
+                steamId: u.steamId
+            }));
+            renderCandidates(candidates, (c) => doSearch(keyword, { candidate: c }));
+        }
+
+        const cand = candidates[0];
+        setHint('');
+        const card = addCard('perfect');
+        card.setSteamId(cand.steamId);
+        state.steamId = cand.steamId;
+
+        await Promise.allSettled([
+            loadPerfect(seq, card, { steamId: cand.steamId }),
+            load5E(seq, card, { steamId: cand.steamId }),
+            loadSteam(seq, card, cand.steamId)
+        ]);
+        if (seq === state.seq) finalizeTitle(card, keyword);
+    }
+
+    async function doSearch(rawKeyword, opts) {
+        const keyword = String(rawKeyword === null || rawKeyword === undefined ? '' : rawKeyword).trim();
+        if (!keyword) { setHint('请输入昵称或 SteamID'); return; }
+        opts = opts || {};
+
+        // 17 位但不是 76 开头，给出提示但仍按昵称查
+        if (/^\d{17}$/.test(keyword) && !STEAM_ID_RE.test(keyword)) {
+            setHint('SteamID 应该是 76 开头共 17 位数字，将按昵称查询…');
+        }
+
+        const seq = ++state.seq;
+        resetResults(!!opts.candidate);
+        state.steamId = null;
+
+        try {
+            if (STEAM_ID_RE.test(keyword)) {
+                await runBySteamId(seq, keyword, state.mode);
+            } else if (state.mode === '5e') {
+                await runBy5ENickname(seq, keyword, opts.candidate);
+            } else {
+                await runByPerfectNickname(seq, keyword, opts.candidate);
+            }
+        } catch (e) {
+            console.error('查询出错:', e);
+            if (seq === state.seq) setHint(`查询出错：${e && e.message ? e.message : e}`);
+        }
+    }
+
+    /* ------------------------- 模式切换 & 初始化 ------------------------- */
+
+    function setMode(mode) {
+        state.mode = mode;
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        $('searchInput').placeholder = mode === '5e'
+            ? '输入 5E 昵称（或 SteamID）'
+            : '输入 完美昵称（或 SteamID）';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 固定暗色配色（取自 client.js），不再提供亮色切换
+        document.documentElement.classList.add('dark');
+
+        // 模式切换
+        setMode('5e');
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => setMode(btn.dataset.mode));
+        });
+
+        // 搜索
+        const input = $('searchInput');
+        $('searchButton').addEventListener('click', () => doSearch(input.value));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doSearch(input.value);
+        });
+    });
+})();
+
+</script>
 </body>
 </html>
